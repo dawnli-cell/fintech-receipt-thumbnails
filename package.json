@@ -1,0 +1,8 @@
+{
+  "name": "fintech-thumbnail-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {"start": "tsx src/thumbnail_service.ts", "test": "tsx src/thumbnail_service.test.ts", "typecheck": "tsc --noEmit"},
+  "dependencies": {"zod": "^3.23.8"},
+  "devDependencies": {"tsx": "^4.19.2", "typescript": "^5.6.3", "@types/node": "^22.0.0"}
+}

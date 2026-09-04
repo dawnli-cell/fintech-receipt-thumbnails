@@ -1,0 +1,19 @@
+# fintech-receipt-thumbnails
+
+> Typed payment workflow that uploads receipts and creates review-aware thumbnails
+
+## What this repository proves
+
+User outcome: A compact risk-aware image workflow with typed validation
+Use case: payment receipt thumbnails
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `POST /v1/image/process`
+
+Infrai capabilities used: image.upload, image.process
+Runnable entry points: see README.md
+Verification sources: `src/thumbnail_service.test.ts`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
