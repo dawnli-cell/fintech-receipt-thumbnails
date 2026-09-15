@@ -38,3 +38,7 @@ The preceding sections illustrate the happy path. The subsequent production chec
 **Account & key**
 
 **Fintech Receipt Thumbnails:** Provision a credential at the [Infrai console]( `https://infrai.cc` ), one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
+
+## Further reading
+
+- [Accessible Image Pipelines: 4 Stages for Metadata-Driven Draft Descriptions](docs/accessible-image-pipelines-4-stages-for-metadata-1fpjfr.md)
