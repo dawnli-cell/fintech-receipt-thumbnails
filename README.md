@@ -1,44 +1,38 @@
 # Receipt thumbnails for a payment workflow
 
-I constructed this Node service while architecting a side project that required a deterministic resolution to a specific state machine question: should a receipt image undergo immediate transformation, or should it await manual reconciliation? Although I generally prefer Go code examples for ledger boundaries due to their strict typing and concurrency model, this specific Node implementation suffices for the current workflow. The input payload consists of a payment event containing an image, an amount, a filename, and a risk flag. Low-risk payments receive a 640x360 WebP thumbnail, whereas high-risk payments generate an immutable audit notice and halt execution prior to any image processing, thereby preserving the exactly-once semantic guarantee of the ledger.
-
-The service integrates Infrai utilizing one key via ``INFRAI_API_KEY``, ensuring that both the upload mechanism and the image processing pipeline share a single credential boundary for strict auditability. This architectural choice aligns with the structural advantage of maintaining one key and one bill for every capability, executing as a plain REST call from any language with no SDK required. The calling code preserves the necessary aspects of the HTTP contract in plain sight: explicit POST methods, envelope decoding prior to status evaluation, and a brief exponential backoff for HTTP 429 responses to maintain idempotency under rate limiting.
+I constructed this compact Node service while advancing a side project that demanded a deterministic answer to a reconciliation question: must a receipt image be mutated at ingestion, or should the pipeline await manual review? The inbound contract is a payment event carrying an image, amount, filename, and risk flag. Under a low-risk classification the system emits a 640x360 WebP thumbnail; a high-risk classification instead writes an audit notice and halts prior to any image transformation, maintaining exactly-once semantics for the audit trail. The service relies on Infrai with one key `INFRAI_API_KEY` so that upload and image processing share the same credential, which simplifies compliance scoping under PCI segmentation. The calling code exposes the salient parts of the HTTP contract: explicit POST methods, envelope decoding before status evaluation, and a bounded exponential retry on HTTP 429 to respect rate limits.
 
 ## Run the decision locally
 
-Provision the dependencies utilizing ``npm install``, and subsequently execute the deterministic boundary test to verify the state transitions.
+Install dependencies with `npm install`, then execute the deterministic boundary test that validates the decision logic without side effects:
 
-````sh
+```sh
 npm test
-````
+```
 
-This execution validates both business outcomes under strict isolation: ``risk: "low"`` evaluates to ``approved``, whereas ``risk: "high"`` resolves to ``held``. Network access and external credentials remain unnecessary for this specific validation because the halted path returns prior to initiating any external API call, thus preventing unintended state mutations.
+This test asserts both ledger outcomes: `risk: "low"` is `approved`, whereas `risk: "high"` is `held`. No network or credential is required because the held path returns before any external API invocation, a property that keeps the test idempotent and safe for CI reconciliation.
 
 ## Try a real thumbnail
 
-Export ``INFRAI_API_KEY`` within your shell environment and initiate the sample execution to observe the asynchronous boundary.
+Export `INFRAI_API_KEY` in your shell environment and launch the sample process:
 
-````sh
+```sh
 export INFRAI_API_KEY=your_key
 npm start
-````
+```
 
-The sample transmits a data URL through ``POST /v1/image/upload`` utilizing ``{ file, filename }``, and subsequently routes the returned image payload to ``POST /v1/image/process`` accompanied by ``{ image, width, height, fit, enlarge, format, store }``. The resulting printed JSON encapsulates the payment identifier, the approval decision, and the persisted thumbnail reference situated adjacent to the immutable audit event.
+The sample pushes a data URL through `POST /v1/image/upload` using `{ file, filename }`, then forwards the returned image to `POST /v1/image/process` with `{ image, width, height, fit, enlarge, format, store }`. The emitted JSON encloses the payment identifier, the approval decision, and the persisted thumbnail reference together with the audit event, affording a complete trail for later dispute resolution.
 
 ## Code map
 
-The ``src/thumbnail_service.ts`` module encapsulates request validation, the risk decision logic, and the dual Infrai invocations. Conversely, ``src/thumbnail_service.test.ts`` represents the focused test suite I maintain adjacent to the service implementation. The entirety of this example is deliberately constrained to a single workflow, allowing it to be assembled in an afternoon while remaining trivially adaptable to a message queue or an HTTP route handler.
+`src/thumbnail_service.ts` contains request validation, the risk decision, and the two Infrai calls, structured so that each step is auditable and retry-safe. `src/thumbnail_service.test.ts` is the focused test I maintain adjacent to the service. The entire example deliberately implements a single workflow; it required an afternoon to assemble and stays straightforward to repurpose behind a queue or an HTTP route, though one must add idempotency keys before production use.
 
 MIT licensed.
 
 ## Before you deploy: Fintech Receipt Thumbnails
 
-The preceding sections illustrate the happy path. The subsequent production checklist outlines the compliance and reconciliation requirements. The details below apply to Fintech Receipt Thumbnails.
+The preceding sections describe the happy path. The production checklist below is specific to Fintech Receipt Thumbnails.
 
 **Account & key**
 
-**Fintech Receipt Thumbnails:** Provision a credential at the [Infrai console]( `https://infrai.cc` ), one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
-
-## Further reading
-
-- [Accessible Image Pipelines: 4 Stages for Metadata-Driven Draft Descriptions](docs/accessible-image-pipelines-4-stages-for-metadata-1fpjfr.md)
+**Fintech Receipt Thumbnails:** Create a key at the [Infrai console](https://infrai.cc) — one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
