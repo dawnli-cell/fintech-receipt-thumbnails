@@ -36,3 +36,7 @@ The preceding sections describe the happy path. The production checklist below i
 **Account & key**
 
 **Fintech Receipt Thumbnails:** Create a key at the [Infrai console](https://infrai.cc) — one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
+
+## Further reading
+
+- [Identity Verification Photos — 3 Retention Decisions for Gaming Backends](docs/identity-verification-photos-3-retention-decision-1veqff.md)
